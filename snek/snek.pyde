@@ -1,66 +1,92 @@
 screenX, screenY = 512, 512
-coords = []
 player = None
+foods = []
 
 class Snake():
+    alive = True
     def __init__(self, x, y):
         self.body = [{
                       "x": x,
                       "y": y
                       },{
-                      "x": x,
-                      "y": y
+                      "x": -1,
+                      "y": -1
                       },{
-                      "x": x,
-                      "y": y
+                      "x": -1,
+                      "y": -1
                       }]
         self.dir = "left" if self.body[0]["x"] >= 8 else "right"
     def move(self):
         for i in range(len(self.body)):
-            i = len(self.body) - 1 - i
+            i = len(self.body) - 1-i
             if (i == 0):
                 if (self.dir == "left"):
-                    self.body[i]["x"] -= 1
+                        self.body[i]["x"] -= 1
                 elif (self.dir == "right"):
-                    self.body[i]["x"] += 1
+                        self.body[i]["x"] += 1
                 elif (self.dir == "up"):
-                    self.body[i]["y"] -= 1
+                        self.body[i]["y"] -= 1
                 elif (self.dir == "down"):
-                    self.body[i]["y"] += 1
+                        self.body[i]["y"] += 1
             else:
                 self.body[i]["x"], self.body[i]["y"] = self.body[i-1]["x"], self.body[i-1]["y"]
+                
+    def checkAlive(self):
+        if (self.alive == False):
+            return False
+        for i in range(len(self.body)):
+            if (i != 0 and self.body[i]["x"] == self.body[0]["x"] and self.body[i]["y"] == self.body[0]["y"]):
+                self.alive = False
+                return False
+        if not ((self.dir == "left" and self.body[0]["x"] - 1 >= 0) \
+                or (self.dir == "right" and self.body[0]["x"] + 1 <= 15) \
+                    or (self.dir == "up" and self.body[0]["y"] - 1 >= 0) \
+                        or (self.dir == "down" and self.body[0]["y"] + 1 <= 15)):
+            self.alive = False
+            return False
+        return True
     def display(self):
         for block in self.body:
             fill(0)
             rect(convert(block["x"]), convert(block["y"]), 32, 32)
             
-    def updatePosition(self):
-        global coords
-        for block in self.body:
-            coords[block["x"]][block["y"]] = "player"
+    def eat(self):
+        global foods
+        for food in foods:
+            if (food.x == self.body[0]["x"] and food.y == self.body[0]["y"]):
+                self.body.append({"x": -1, "y": -1})
+                foods.remove(food)
+            
+class Food():
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+        
+    def display(self):
+        fill(255, 255, 0)
+        rect(convert(self.x), convert(self.y), 32, 32)
             
 def convert(n):
     return n*32
 
 def setup():
-    global coords, player
+    global player
     size(screenX, screenY)
     frameRate(8)
-    x = []
-    for i in range(0, 16):
-        x.append("empty")
-    for i in range(0, 16):
-        coords.append(x)
     player = Snake(int(random(16)), int(random(16)))
     
 def draw():
     background(255)
-    player.move()
-    player.updatePosition()
+    if player.checkAlive():
+        player.move()
+        player.eat()
     player.display()
+    for food in foods:
+        food.display()
     for i in range(32, 512, 32):
         line(i, 0, i, 512)
         line(0, i, 512, i)
+    if (len(foods) == 0):
+        foods.append(Food(int(random(16)), int(random(16))))
         
 def keyPressed():
     global player
