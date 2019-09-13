@@ -1,6 +1,4 @@
 screenX, screenY = 512, 512
-player = None
-foods = []
 
 class Snake():
     alive = True
@@ -32,17 +30,13 @@ class Snake():
                 self.body[i]["x"], self.body[i]["y"] = self.body[i-1]["x"], self.body[i-1]["y"]
                 
     def checkAlive(self):
-        if (self.alive == False):
-            return False
         for i in range(len(self.body)):
             if (i != 0 and self.body[i]["x"] == self.body[0]["x"] and self.body[i]["y"] == self.body[0]["y"]):
-                self.alive = False
                 return False
         if not ((self.dir == "left" and self.body[0]["x"] - 1 >= 0) \
                 or (self.dir == "right" and self.body[0]["x"] + 1 <= 15) \
                     or (self.dir == "up" and self.body[0]["y"] - 1 >= 0) \
                         or (self.dir == "down" and self.body[0]["y"] + 1 <= 15)):
-            self.alive = False
             return False
         return True
     def display(self):
@@ -51,7 +45,6 @@ class Snake():
             rect(convert(block["x"]), convert(block["y"]), 32, 32)
             
     def eat(self):
-        global foods
         for food in foods:
             if (food.x == self.body[0]["x"] and food.y == self.body[0]["y"]):
                 self.body.append({"x": -1, "y": -1})
@@ -68,28 +61,45 @@ class Food():
 def convert(n):
     return n*32
 
-def setup():
-    global player
-    size(screenX, screenY)
-    frameRate(8)
+def reset():
+    global player, foods, gamestate, moveTicks
     player = Snake(int(random(16)), int(random(16)))
+    foods = []
+    gamestate = 0
+    moveTicks = 0
+
+def setup():
+    global player, foods, gamestate, moveTicks
+    size(screenX, screenY)
+    frameRate(60)
+    player = Snake(int(random(16)), int(random(16)))
+    foods = []
+    gamestate = 0
+    moveTicks = 0
     
 def draw():
+    global gamestate, moveTicks
     background(255)
-    if player.checkAlive():
-        player.move()
-        player.eat()
-    player.display()
+    if (gamestate == 1):
+        if (moveTicks == 8):
+            if player.checkAlive():
+                moveTicks = 0
+                player.move()
+                player.eat()
+            else:
+                reset()
+        moveTicks += 1
+    if (len(foods) == 0):
+        foods.append(Food(int(random(16)), int(random(16))))
     for food in foods:
         food.display()
+    player.display()
     for i in range(32, 512, 32):
         line(i, 0, i, 512)
         line(0, i, 512, i)
-    if (len(foods) == 0):
-        foods.append(Food(int(random(16)), int(random(16))))
         
 def keyPressed():
-    global player
+    global player, gamestate
     if ((key == "a" or keyCode == LEFT) and player.dir != "right"):
         player.dir = "left"
     elif ((key == "d" or keyCode == RIGHT) and player.dir != "left"):
@@ -98,4 +108,5 @@ def keyPressed():
         player.dir = "up"
     elif ((key == "s" or keyCode == DOWN) and player.dir != "up"):
         player.dir = "down"
+    gamestate = 1
     
