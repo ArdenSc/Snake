@@ -73,9 +73,10 @@ def reset():
     moveTicks = 0
 
 def setup():
-    global player, foods, gamestate, moveTicks
+    global player, foods, gamestate, moveTicks, font
     size(screenX, screenY)
     frameRate(60)
+    font = createFont('Impact', 256)
     player = Snake(int(random(16)), int(random(16)))
     foods = []
     gamestate = 0
@@ -95,9 +96,14 @@ def draw():
         moveTicks += 1
     if (len(foods) == 0):
         foods.append(Food(int(random(16)), int(random(16))))
+    fill(163, 163, 163, 50)
+    textFont(font)
+    textAlign(CENTER, CENTER)
+    text(len(player.body) - 3, screenX/2, screenY/2 - 28)
     for food in foods:
         food.display()
     player.display()
+    fill(0)
     for i in range(32, 512, 32):
         line(i, 0, i, 512)
         line(0, i, 512, i)
