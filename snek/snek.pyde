@@ -3,6 +3,7 @@ screenX, screenY = 512, 512
 class Snake():
     alive = True
     currentDir = None
+    pendingDir = None
     def __init__(self, x, y):
         self.body = [{"x": x, "y": y} if i == 0 else {"x": -1, "y": -1} for i in range(3)]
     def move(self):
@@ -20,6 +21,7 @@ class Snake():
                 self.currentDir = self.dir
                 if (self.pendingDir != None):
                     self.dir = self.pendingDir
+                    self.pendingDir = None
             else:
                 self.body[i]["x"], self.body[i]["y"] = self.body[i-1]["x"], self.body[i-1]["y"]
                 
@@ -65,7 +67,7 @@ def reset():
 def setup():
     global player, foods, gamestate, moveTicks, font
     size(screenX, screenY)
-    frameRate(60)
+    frameRate(120)
     font = createFont('Impact', 256)
     player = Snake(int(random(16)), int(random(16)))
     foods = []
@@ -76,7 +78,7 @@ def draw():
     global gamestate, moveTicks
     background(255)
     if (gamestate == 1):
-        if (moveTicks == 8):
+        if (moveTicks == 16):
             if player.checkAlive():
                 moveTicks = 0
                 player.move()
@@ -101,27 +103,23 @@ def draw():
 def keyPressed():
     global player, gamestate
     if (key == "a" or keyCode == LEFT):
-        if (player.currentDir != "right"):
+        if (player.currentDir != "right" and player.pendingDir == None):
             player.dir = "left"
-            player.pendingDir = None
         elif (player.currentDir != player.dir):
             player.pendingDir = "left"
     if (key == "d" or keyCode == RIGHT):
-        if (player.currentDir != "left"):
+        if (player.currentDir != "left" and player.pendingDir == None):
             player.dir = "right"
-            player.pendingDir = None
         elif (player.currentDir != player.dir):
             player.pendingDir = "right"
     if (key == "w" or keyCode == UP):
-        if (player.currentDir != "down"):
+        if (player.currentDir != "down" and player.pendingDir == None):
             player.dir = "up"
-            player.pendingDir = None
         elif (player.currentDir != player.dir):
             player.pendingDir = "up"
     if (key == "s" or keyCode == DOWN):
-        if (player.currentDir != "up"):
+        if (player.currentDir != "up" and player.pendingDir == None):
             player.dir = "down"
-            player.pendingDir = None
         elif (player.currentDir != player.dir):
             player.pendingDir = "down"
     gamestate = 1
