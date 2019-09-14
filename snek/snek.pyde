@@ -2,19 +2,9 @@ screenX, screenY = 512, 512
 
 class Snake():
     alive = True
-    dir = None
     currentDir = None
     def __init__(self, x, y):
-        self.body = [{
-                      "x": x,
-                      "y": y
-                      },{
-                      "x": -1,
-                      "y": -1
-                      },{
-                      "x": -1,
-                      "y": -1
-                      }]
+        self.body = [{"x": x, "y": y} if i == 0 else {"x": -1, "y": -1} for i in range(3)]
     def move(self):
         for i in range(len(self.body)):
             i = len(self.body) - 1-i
